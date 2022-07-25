@@ -1,4 +1,4 @@
-package com.infinite.mediacodecdemo;
+package com.infinite.mediacodecdemo.activity;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,8 +19,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
-import com.infinite.mediacodecdemo.activity.DecodeActivity;
-import com.infinite.mediacodecdemo.activity.EncodeActivity;
+import com.infinite.mediacodecdemo.R;
 import com.infinite.mediacodecdemo.util.PermissionHelper;
 
 public class MainActivity extends AppCompatActivity {
