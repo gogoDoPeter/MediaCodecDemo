@@ -29,6 +29,8 @@
         </activity>
         <activity android:name=".activity.DecodeActivity"/>
         <activity android:name=".activity.EncodeActivity"/>
+        <activity android:name=".activity.SyncEncodeActivity"/>
+        <activity android:name=".activity.SyncEncodeActivity2"/>
     </application>
 
 </manifest>

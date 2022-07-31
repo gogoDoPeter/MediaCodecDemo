@@ -25,6 +25,28 @@
             android:textAllCaps="false"
             android:id="@+id/bt_decode"
             android:onClick="decodeVideo"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MediaCodec Sync encode"
+            android:textAllCaps="false"
+            android:id="@+id/bt_sync_encode"
+            android:onClick="syncEncodeVideo"/>
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MediaCodec Sync encode2"
+            android:textAllCaps="false"
+            android:onClick="syncEncodeVideo2"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MediaCodec Async encode"
+            android:textAllCaps="false"
+            android:id="@+id/bt_async_encode"
+            android:onClick="asyncEncodeVideo"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

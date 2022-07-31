@@ -57,7 +57,6 @@ public class TextureMovieEncoder implements Runnable {
         // Establish a Looper for this thread, and define a Handler for it.
         Looper.prepare();
         synchronized (mReadyFence) {
-
             mHandler = new EncoderHandler(this);
             mReady = true;
             Log.d(TAG, "Encoder thread before notify");
