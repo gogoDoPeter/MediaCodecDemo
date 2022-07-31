@@ -1,6 +1,9 @@
 package com.infinite.mediacodecdemo.util;
 
 public class Constants {
+
+    public static final boolean DEBUG_ON = true;
+
     // Camera filters; must match up with cameraFilterNames in strings.xml
     public static final int FILTER_NONE = 0;
     public static final int FILTER_BLACK_WHITE = 1;

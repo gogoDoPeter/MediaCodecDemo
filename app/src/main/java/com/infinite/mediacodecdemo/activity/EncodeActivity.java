@@ -67,10 +67,10 @@ public class EncodeActivity extends AppCompatActivity
         spinner = ((Spinner) findViewById(R.id.cameraFilter_spinner));
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.cameraFilterNames, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner.
         spinner.setAdapter(adapter);
-        spinner.setOnItemClickListener((AdapterView.OnItemClickListener) this);
+        spinner.setOnItemSelectedListener(this);
 
         // Define a handler that receives camera-control messages from other threads.  All calls
         // to Camera must be made on the same thread.  Note we create this before the renderer
@@ -109,6 +109,7 @@ public class EncodeActivity extends AppCompatActivity
         }
 
         mGLView.onResume();
+
         // TODO queueEvent 有什么用？ 使用queueEvent给OpenGL线程分发调用，属于线程间通信方式
         //  Android的UI运行在主线程，而OpenGL的GLSurfaceView运行在一个单独的线程中，因此需要使用线程安全的技术在两个线程间通信。
         mGLView.queueEvent(new Runnable() {
@@ -197,7 +198,7 @@ public class EncodeActivity extends AppCompatActivity
         AspectFrameLayout layout = ((AspectFrameLayout) findViewById(R.id.cameraPreview_afl));
 
         Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
-        Log.d(TAG, "rotation " + display.getRotation() + " W " + mPreviewWidth + " H " + mPreviewHeight);
+        Log.d(TAG, "rotation " + display.getRotation() + " previewWidth " + mPreviewWidth + " previewHeight " + mPreviewHeight);
         if (display.getRotation() == Surface.ROTATION_0) {
             mCamera.setDisplayOrientation(90);
             layout.setAspectRatio((double) mPreviewHeight / mPreviewWidth);
@@ -263,12 +264,8 @@ public class EncodeActivity extends AppCompatActivity
         Log.d(TAG, "onNothingSelected");
     }
 
-    /**
-     * Connects the SurfaceTexture to the Camera preview output, and starts the preview.
-     *
-     * @param surfaceTexture
-     */
-    public void handleSetSurfaceTexture(SurfaceTexture surfaceTexture) {
+    //Connects the SurfaceTexture to the Camera preview output, and starts the preview.
+    public void handleSetSurfaceTexture(SurfaceTexture surfaceTexture) {//在surfaceTexture创建绑定好，再传到这里启动camera 预览
         Log.d(TAG, "handleSetSurfaceTexture");
         surfaceTexture.setOnFrameAvailableListener(this);// 设置对frame可用的监听
         try {
@@ -298,11 +295,10 @@ public class EncodeActivity extends AppCompatActivity
         // so it doesn't really matter.
 
 //        if (VERBOSE) Log.d(TAG, "ST onFrameAvailable surfaceTexture:"+surfaceTexture);
-        //do onDraw 通知GLSurfaceView draw来更新预览
 
         /*Request that the renderer render a frame. This method is typically used when the render mode
          has been set to RENDERMODE_WHEN_DIRTY, so that frames are only rendered on demand.
         May be called from any thread. Must not be called before a renderer has been set.*/
-        mGLView.requestRender();
+        mGLView.requestRender(); //do onDraw 通知GLSurfaceView draw来更新预览
     }
 }
