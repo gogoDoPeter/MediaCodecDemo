@@ -77,6 +77,9 @@ public class EncoderCore implements Camera1Helper.OnPreviewListener, Camera1Help
             mEncoder.setOutputPath(mContext.getExternalCacheDir().getAbsolutePath() + File.separator + "mc_sync.mp4");
             mEncoder.startEncoder();
         }
+        if(mFrameIndex < 10){
+            Log.d(TAG,"my-tag startMediaCodecRecord width:"+width+" height:"+height);
+        }
         String fileNameIn = "/sdcard/DCIM/in_" + String.format("%d_%dx%d.nv21", mFrameIndex, width, height); //get NV21 data
 //        FileUtils.dumpData(data, width, height, fileNameIn);
         byte[] outI420 = new byte[width * height * 3 / 2];

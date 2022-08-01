@@ -107,7 +107,7 @@ public class Camera1Helper implements SurfaceHolder.Callback, Camera.PreviewCall
             // 设置摄像头 图像传感器的角度、方向
             setPreviewOrientation(parameters);
             mCamera.setParameters(parameters);
-
+            Log.d(TAG,"my-tag startPreview width:"+mWidth+" height:"+mHeight);
             buffer = new byte[mWidth * mHeight * 3 / 2];
             // 数据缓存区
             mCamera.addCallbackBuffer(buffer);
@@ -205,6 +205,7 @@ public class Camera1Helper implements SurfaceHolder.Callback, Camera.PreviewCall
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        Log.d(TAG,"my-tag surfaceChanged width:"+width+" height:"+height);
         // 释放摄像头
         stopPreview();
         // 开启摄像头

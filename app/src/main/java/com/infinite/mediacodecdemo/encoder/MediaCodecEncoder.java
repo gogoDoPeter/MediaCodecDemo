@@ -150,7 +150,7 @@ public class MediaCodecEncoder extends BaseEncoder {
                                     // the INFO_OUTPUT_FORMAT_CHANGED status.  Ignore it.
                                     Log.d(TAG, "ignoring BUFFER_FLAG_CODEC_CONFIG");
                                     configByte = new byte[mBufferInfo.size];
-                                    Log.e("codec_tag", "new configByte, mBufferInfo.size:" + mBufferInfo.size);
+                                    Log.e(TAG, "new configByte, mBufferInfo.size:" + mBufferInfo.size);
                                     configByte = outBuffer2;
 
                                     mBufferInfo.size = 0;
