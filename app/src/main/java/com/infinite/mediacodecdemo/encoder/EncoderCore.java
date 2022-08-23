@@ -83,7 +83,8 @@ public class EncoderCore implements Camera1Helper.OnPreviewListener, Camera1Help
         String fileNameIn = "/sdcard/DCIM/in_" + String.format("%d_%dx%d.nv21", mFrameIndex, width, height); //get NV21 data
 //        FileUtils.dumpData(data, width, height, fileNameIn);
         byte[] outI420 = new byte[width * height * 3 / 2];
-        NV21ToYUV420(data, outI420, width, height);     //NV21 convert to I420
+//        NV21ToYUV420(data, outI420, width, height);     //NV21 convert to I420
+        NV21ToNV12(data, outI420, width, height);     //NV21 convert to NV12
         String fileNameOut = "/sdcard/DCIM/out_" + String.format("%d_%dx%d.i420", mFrameIndex, width, height); //get I420 data
 //        FileUtils.dumpData(outI420, width, height, fileNameOut);
         mFrameIndex++;
@@ -93,6 +94,21 @@ public class EncoderCore implements Camera1Helper.OnPreviewListener, Camera1Help
         //NV21ToYUV420(data,nv12,width,height);
 
         mEncoder.putData(outI420);
+    }
+
+    private void NV21ToNV12(byte[] input, byte[] out, int width, int height) {
+        if (input == null || out == null || width <= 0 || height <= 0) {
+            Log.d(TAG, "input param error");
+            return;
+        }
+        int yDataSize = width * height;
+        int uvDataSize = yDataSize / 4;
+        System.arraycopy(input, 0, out, 0, yDataSize);
+        //Copy uv data
+        for (int i = 0; i < uvDataSize; ++i) {
+            out[yDataSize + i*2] = input[yDataSize + 1 + i * 2]; //u
+            out[yDataSize + 1 + i*2] = input[yDataSize + i * 2]; //v
+        }
     }
 
     private void NV21ToYUV420(byte[] input, byte[] out, int width, int height) {

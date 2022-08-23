@@ -45,10 +45,10 @@ public class MediaCodecEncoder extends BaseEncoder {
         mFrameIndex = 0;
         mBufferInfo = new MediaCodec.BufferInfo();
         MediaFormat mediaFormat = MediaFormat.createVideoFormat(MIMETYPE_VIDEO_AVC, width, height);
-        mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible);
+        mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible); //设置COLOR_FormatYUV420Flexible要给mediaCode传NV12数据来编码
         mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, width * height * 5);
-        mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 30);//FPS
-        mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
+        mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 25);//FPS
+        mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2); //2~3s插入一个关键帧比较合理
 
         try {
             mMediaCodec = MediaCodec.createEncoderByType(MIMETYPE_VIDEO_AVC);
