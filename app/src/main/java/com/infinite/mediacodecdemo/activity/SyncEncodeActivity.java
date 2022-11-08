@@ -15,8 +15,8 @@ import com.infinite.mediacodecdemo.R;
 import com.infinite.mediacodecdemo.camera.CameraProxy;
 import com.infinite.mediacodecdemo.ui.CameraSurfaceView;
 
-public class SyncEncodeActivity extends AppCompatActivity implements View.OnClickListener{
-    private static final String TAG="SyncEncodeActivity";
+public class SyncEncodeActivity extends AppCompatActivity implements View.OnClickListener {
+    private static final String TAG = "SyncEncodeActivity";
     private CameraSurfaceView mCameraView;
     private CameraProxy mCameraProxy;
     private Button mSwitchCamera;
@@ -28,7 +28,7 @@ public class SyncEncodeActivity extends AppCompatActivity implements View.OnClic
         Log.d(TAG, "onCreate +");
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_sync_encode);
-        
+
         initView();
     }
 

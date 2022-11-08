@@ -14,7 +14,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class EncoderCore implements Camera1Helper.OnPreviewListener, Camera1Helper.OnChangedSizeListener {
+public class EncoderCore implements Camera1Helper.OnPreviewListener,
+        Camera1Helper.OnChangedSizeListener {
     private static final String TAG = "MediaEncoder";
     private Camera1Helper mCamera1Helper;
     private boolean mIsRecording;
@@ -26,6 +27,7 @@ public class EncoderCore implements Camera1Helper.OnPreviewListener, Camera1Help
     public EncoderCore(Activity activity) {
         mContext = activity;
         mOutFile = new File(mContext.getExternalCacheDir(), "demo1.yuv");
+        Log.d(TAG, "getExternalCacheDir:" + mOutFile);
 
         mCamera1Helper = new Camera1Helper(activity, 0, 1920, 1080);
         mCamera1Helper.setOnPreviewListener(this); // 设置 onPreviewData(nv21)数据的回调监听
@@ -77,8 +79,8 @@ public class EncoderCore implements Camera1Helper.OnPreviewListener, Camera1Help
             mEncoder.setOutputPath(mContext.getExternalCacheDir().getAbsolutePath() + File.separator + "mc_sync.mp4");
             mEncoder.startEncoder();
         }
-        if(mFrameIndex < 10){
-            Log.d(TAG,"my-tag startMediaCodecRecord width:"+width+" height:"+height);
+        if (mFrameIndex < 10) {
+            Log.d(TAG, "my-tag startMediaCodecRecord width:" + width + " height:" + height);
         }
         String fileNameIn = "/sdcard/DCIM/in_" + String.format("%d_%dx%d.nv21", mFrameIndex, width, height); //get NV21 data
 //        FileUtils.dumpData(data, width, height, fileNameIn);
@@ -103,14 +105,16 @@ public class EncoderCore implements Camera1Helper.OnPreviewListener, Camera1Help
         }
         int yDataSize = width * height;
         int uvDataSize = yDataSize / 4;
+        //Copy y data
         System.arraycopy(input, 0, out, 0, yDataSize);
         //Copy uv data
         for (int i = 0; i < uvDataSize; ++i) {
-            out[yDataSize + i*2] = input[yDataSize + 1 + i * 2]; //u
-            out[yDataSize + 1 + i*2] = input[yDataSize + i * 2]; //v
+            out[yDataSize + i * 2] = input[yDataSize + 1 + i * 2]; //u
+            out[yDataSize + 1 + i * 2] = input[yDataSize + i * 2]; //v
         }
     }
 
+    //TODO 写的不对，导致uv数据不对，花屏
     private void NV21ToYUV420(byte[] input, byte[] out, int width, int height) {
         /*if (nv21 == null || yuv420 == null) return
         val framesize = width * height
