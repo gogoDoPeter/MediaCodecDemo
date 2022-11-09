@@ -12,7 +12,7 @@ import java.util.List;
 
 public class Camera1Helper implements SurfaceHolder.Callback, Camera.PreviewCallback{
 
-    private static final String TAG = "CameraHelper";
+    private static final String TAG = "Camera1Helper";
     private Activity mActivity;
     private int mHeight; // 高
     private int mWidth; // 宽
@@ -33,6 +33,7 @@ public class Camera1Helper implements SurfaceHolder.Callback, Camera.PreviewCall
         mCameraId = cameraId;
         mWidth = width;
         mHeight = height;
+        Log.d(TAG,"Camera1Helper Constructor, width:"+mWidth+" height:"+mHeight +" CameraId:"+mCameraId);
     }
 
     /**
@@ -107,7 +108,7 @@ public class Camera1Helper implements SurfaceHolder.Callback, Camera.PreviewCall
             // 设置摄像头 图像传感器的角度、方向
             setPreviewOrientation(parameters);
             mCamera.setParameters(parameters);
-            Log.d(TAG,"my-tag startPreview width:"+mWidth+" height:"+mHeight);
+            Log.d(TAG,"startPreview width:"+mWidth+" height:"+mHeight);
             buffer = new byte[mWidth * mHeight * 3 / 2];
             // 数据缓存区
             mCamera.addCallbackBuffer(buffer);
@@ -201,19 +202,23 @@ public class Camera1Helper implements SurfaceHolder.Callback, Camera.PreviewCall
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 下面就是SurfaceView 需要的 start
 
     @Override
-    public void surfaceCreated(SurfaceHolder holder) { }
+    public void surfaceCreated(SurfaceHolder holder) {
+        Log.d(TAG,"surfaceCreated ");
+    }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Log.d(TAG,"my-tag surfaceChanged width:"+width+" height:"+height);
+        Log.d(TAG,"surfaceChanged width:"+width+" height:"+height);
         // 释放摄像头
         stopPreview();
+        Log.d(TAG,"surfaceChanged startPreview ");
         // 开启摄像头
         startPreview();
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+        Log.d(TAG,"surfaceDestroyed ");
         stopPreview(); // 只要画面不可见，就必须释放，因为预览耗电 耗资源
     }
 

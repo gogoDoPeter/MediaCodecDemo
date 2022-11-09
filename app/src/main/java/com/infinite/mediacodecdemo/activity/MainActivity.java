@@ -130,16 +130,18 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void syncEncodeSurfaceVideo(View view) {
+
+    }
+
     public void syncEncodeVideo(View view) {
         Intent intent = new Intent(MainActivity.this, SyncEncodeActivity.class);
         startActivity(intent);
     }
-    public void syncEncodeVideo2(View view) {
-        Intent intent = new Intent(MainActivity.this, SyncEncodeActivity2.class);
-        startActivity(intent);
-    }
-    public void asyncEncodeVideo(View view) {
 
+    public void asyncEncodeVideo(View view) {
+        Intent intent = new Intent(MainActivity.this, ASyncEncodeActivity.class);
+        startActivity(intent);
     }
 
 

@@ -21,8 +21,8 @@ import java.util.concurrent.Executors;
  */
 public class MediaCodecEncoder extends BaseEncoder {
     private static final String TAG = "MediaCodecEncoder";
-//    public static final String MIMETYPE_VIDEO_AVC = "video/avc";
-    public static final String MIMETYPE_VIDEO_AVC = "video/hevc";
+    public static final String MIMETYPE_VIDEO_AVC = "video/avc";
+//    public static final String MIMETYPE_VIDEO_AVC = "video/hevc";
     public static final int H264_ENCODER = 1;
     private static final int TIMEOUT_S = 10000;
     private MediaCodec mMediaCodec;

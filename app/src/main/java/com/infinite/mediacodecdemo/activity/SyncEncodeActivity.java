@@ -1,9 +1,8 @@
 package com.infinite.mediacodecdemo.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -12,42 +11,79 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.infinite.mediacodecdemo.R;
-import com.infinite.mediacodecdemo.camera.CameraProxy;
-import com.infinite.mediacodecdemo.ui.CameraSurfaceView;
+import com.infinite.mediacodecdemo.encoder.EncoderCore;
 
 public class SyncEncodeActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = "SyncEncodeActivity";
-    private CameraSurfaceView mCameraView;
-    private CameraProxy mCameraProxy;
-    private Button mSwitchCamera;
-    private Button mStartRecord;
+    private EncoderCore mEncoderCore;
+    private boolean mIsRecording;
+    private SurfaceView mSurfaceView;
+    private Button mBtStartRecord;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate +");
+
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.activity_sync_encode);
+        setContentView(R.layout.activity_sync_encode2);
 
         initView();
+        initData();
+    }
+
+    private void initData() {
+        mBtStartRecord.setOnClickListener(this);
+        mIsRecording = false;
+        mEncoderCore = new EncoderCore(this);
+        mEncoderCore.setPreviewDisplay(mSurfaceView.getHolder());
     }
 
     private void initView() {
-        Log.d(TAG, "initView +");
-        mSwitchCamera = findViewById(R.id.bt_switch_camera);
-        mStartRecord = (Button) findViewById(R.id.bt_start_record);
-        mCameraView = findViewById(R.id.camera_view);
-        mCameraProxy = mCameraView.getCameraProxy();
-        Log.d(TAG, "initView -");
+        mBtStartRecord = (Button) findViewById(R.id.bt_start_record2);
+        findViewById(R.id.bt_switch_camera2).setOnClickListener(this);
+        mSurfaceView = findViewById(R.id.surface_view2);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.bt_start_record:
+            case R.id.bt_start_record2:
+                Log.d(TAG,"start record");
+                startRecording();
                 break;
-            case R.id.bt_switch_camera:
+            case R.id.bt_switch_camera2:
+                Log.d(TAG,"switch camera");
                 break;
         }
+    }
+
+    private void startRecording() {
+        mIsRecording = !mIsRecording;
+
+        if (mIsRecording) {
+            mEncoderCore.startRecord();
+            mBtStartRecord.setText("MediaCodec停止");
+        } else {
+            mEncoderCore.stopRecord();
+            mBtStartRecord.setText("MediaCodec开始");
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG,"onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG,"onPause");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG,"onDestroy");
     }
 }

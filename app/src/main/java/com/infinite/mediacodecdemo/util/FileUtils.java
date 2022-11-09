@@ -8,7 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class FileUtils {
-    private static final String TAG="FileUtils";
+    private static final String TAG = "FileUtils";
 
     public static void dumpData(byte[] data, int width, int height, String fileName) {
         if (data == null || width <= 0 || height <= 0) {
@@ -16,7 +16,7 @@ public class FileUtils {
             return;
         }
         int dataSize = data.length;
-        Log.d(TAG,"dump file="+fileName+" dataSize="+dataSize);
+        Log.d(TAG, "dump file:" + fileName + " dataSize:" + dataSize);
         try {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(fileName));
             bos.write(data, 0, dataSize);
