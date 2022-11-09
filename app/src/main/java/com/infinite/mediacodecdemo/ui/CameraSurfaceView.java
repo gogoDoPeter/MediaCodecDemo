@@ -40,38 +40,38 @@ public class CameraSurfaceView extends SurfaceView {
 
     private void init(Context context) {
         Log.d(TAG," init +");
-        getHolder().addCallback(mSurfaceHolderCallback);
-        mCameraProxy = new CameraProxy((Activity) context);
+//        getHolder().addCallback(mSurfaceHolderCallback);
+//        mCameraProxy = new CameraProxy((Activity) context);
         Log.d(TAG," init -");
     }
 
-    private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
-        @Override
-        public void surfaceCreated(SurfaceHolder holder) {
-            Log.d(TAG, "surfaceCreated");
-            mCameraProxy.openCamera();
-        }
-
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            int previewWidth = mCameraProxy.getPreviewWidth();
-            int previewHeight = mCameraProxy.getPreviewHeight();
-            Log.d(TAG, "surfaceChanged width=" + width + " height=" + height + " previewWidth=" + previewWidth + " previewHeight=" + previewHeight);
-            if (width > height) {
-                setAspectRatio(previewWidth, previewHeight);
-            } else {
-                setAspectRatio(previewHeight, previewWidth);
-            }
-            Log.d(TAG, "surfaceChanged start preview");
-            mCameraProxy.startPreview(holder);
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-            Log.d(TAG, "surfaceDestroyed");
-            mCameraProxy.releaseCamera();
-        }
-    };
+//    private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
+//        @Override
+//        public void surfaceCreated(SurfaceHolder holder) {
+//            Log.d(TAG, "surfaceCreated");
+//            mCameraProxy.openCamera();
+//        }
+//
+//        @Override
+//        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+//            int previewWidth = mCameraProxy.getPreviewWidth();
+//            int previewHeight = mCameraProxy.getPreviewHeight();
+//            Log.d(TAG, "surfaceChanged width=" + width + " height=" + height + " previewWidth=" + previewWidth + " previewHeight=" + previewHeight);
+//            if (width > height) {
+//                setAspectRatio(previewWidth, previewHeight);
+//            } else {
+//                setAspectRatio(previewHeight, previewWidth);
+//            }
+//            Log.d(TAG, "surfaceChanged start preview");
+//            mCameraProxy.startPreview(holder);
+//        }
+//
+//        @Override
+//        public void surfaceDestroyed(SurfaceHolder holder) {
+//            Log.d(TAG, "surfaceDestroyed");
+//            mCameraProxy.releaseCamera();
+//        }
+//    };
 
     private void setAspectRatio(int width, int height) {
         if (width < 0 || height < 0) {
@@ -82,9 +82,9 @@ public class CameraSurfaceView extends SurfaceView {
         requestLayout();
     }
 
-    public CameraProxy getCameraProxy() {
-        return mCameraProxy;
-    }
+//    public CameraProxy getCameraProxy() {
+//        return mCameraProxy;
+//    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -103,31 +103,31 @@ public class CameraSurfaceView extends SurfaceView {
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getPointerCount() == 1) {
-            // 点击聚焦
-            mCameraProxy.focusOnPoint((int) event.getX(), (int) event.getY(), getWidth(), getHeight());
-            return true;
-        }
-        switch (event.getAction() & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_POINTER_DOWN:
-                mOldDistance = getFingerSpacing(event);
-                break;
-            case MotionEvent.ACTION_MOVE:
-                float newDistance = getFingerSpacing(event);
-                if (newDistance > mOldDistance) {
-                    mCameraProxy.handleZoom(true);
-                } else if (newDistance < mOldDistance) {
-                    mCameraProxy.handleZoom(false);
-                }
-                mOldDistance = newDistance;
-                break;
-            default:
-                break;
-        }
-        return super.onTouchEvent(event);
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        if (event.getPointerCount() == 1) {
+//            // 点击聚焦
+//            mCameraProxy.focusOnPoint((int) event.getX(), (int) event.getY(), getWidth(), getHeight());
+//            return true;
+//        }
+//        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+//            case MotionEvent.ACTION_POINTER_DOWN:
+//                mOldDistance = getFingerSpacing(event);
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                float newDistance = getFingerSpacing(event);
+//                if (newDistance > mOldDistance) {
+//                    mCameraProxy.handleZoom(true);
+//                } else if (newDistance < mOldDistance) {
+//                    mCameraProxy.handleZoom(false);
+//                }
+//                mOldDistance = newDistance;
+//                break;
+//            default:
+//                break;
+//        }
+//        return super.onTouchEvent(event);
+//    }
 
     private static float getFingerSpacing(MotionEvent event) {
         float x = event.getX(0) - event.getX(1);

@@ -31,17 +31,17 @@ public class SyncEncodeActivity extends AppCompatActivity implements View.OnClic
         initData();
     }
 
+    private void initView() {
+        mBtStartRecord = (Button) findViewById(R.id.bt_start_record2);
+        findViewById(R.id.bt_switch_camera2).setOnClickListener(this);
+        mSurfaceView = findViewById(R.id.surface_view2);
+    }
+
     private void initData() {
         mBtStartRecord.setOnClickListener(this);
         mIsRecording = false;
         mEncoderCore = new EncoderCore(this);
         mEncoderCore.setPreviewDisplay(mSurfaceView.getHolder());
-    }
-
-    private void initView() {
-        mBtStartRecord = (Button) findViewById(R.id.bt_start_record2);
-        findViewById(R.id.bt_switch_camera2).setOnClickListener(this);
-        mSurfaceView = findViewById(R.id.surface_view2);
     }
 
     @Override

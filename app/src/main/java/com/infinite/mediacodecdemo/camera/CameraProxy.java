@@ -3,18 +3,20 @@ package com.infinite.mediacodecdemo.camera;
 import android.app.Activity;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
-import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import androidx.annotation.NonNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CameraProxy implements Camera.AutoFocusCallback{
+public class CameraProxy implements Camera.AutoFocusCallback,
+        SurfaceHolder.Callback, Camera.PreviewCallback{
     private static final String TAG = "CameraProxy";
 
     private Activity mActivity;
@@ -30,15 +32,75 @@ public class CameraProxy implements Camera.AutoFocusCallback{
     private int mLatestRotation = 0;
 
     private byte[] mPreviewBuffer;
+    private byte[] mBuffer; // 存储回调数据
+    private OnChangedSizeListener mOnChangedSizeListener; // 你的宽和高发生改变，就会回调此接口
+    private OnPreviewListener onPreviewListener;
+    private SurfaceHolder mSurfaceHolder; // Surface画面的帮助类
 
-    public CameraProxy(Activity activity) {
+    public CameraProxy(Activity activity, int cameraId, int width, int height) {
         mActivity = activity;
+        mCameraId = cameraId;
+        mPreviewWidth = width;
+        mPreviewHeight = height;
         mOrientationEventListener = new OrientationEventListener(mActivity) {
             @Override
             public void onOrientationChanged(int orientation) {
                 setPictureRotate(orientation);
             }
         };
+    }
+    public void setOnChangedSizeListener(OnChangedSizeListener listener) {
+        mOnChangedSizeListener = listener;
+    }
+
+    public void setOnPreviewListener(OnPreviewListener onPreviewListener) {
+        this.onPreviewListener = onPreviewListener;
+    }
+
+    /**
+     * 与Surface绑定 == surfaceView.getHolder()
+     * @param surfaceHolder
+     */
+    public void setPreviewDisplay(SurfaceHolder surfaceHolder) {
+        mSurfaceHolder = surfaceHolder;
+        mSurfaceHolder.addCallback(this);
+    }
+
+    @Override
+    public void surfaceCreated(@NonNull SurfaceHolder holder) {
+        Log.d(TAG,"surfaceCreated ");
+    }
+
+    @Override
+    public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
+        Log.d(TAG,"surfaceChanged width:"+width+" height:"+height);
+        // 释放摄像头
+        stopPreview();
+        Log.d(TAG,"surfaceChanged startPreview ");
+        // 开启摄像头
+        startPreview();
+    }
+
+    @Override
+    public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+        Log.d(TAG,"surfaceDestroyed ");
+        stopPreview(); // 只要画面不可见，就必须释放，因为预览耗电 耗资源
+    }
+
+    @Override
+    public void onPreviewFrame(byte[] data, Camera camera) {
+        if(onPreviewListener !=null){
+            onPreviewListener.onPreviewData(data, mPreviewWidth, mPreviewHeight);
+        }
+        camera.addCallbackBuffer(mBuffer);
+    }
+
+    public interface OnChangedSizeListener {
+        void onChanged(int width, int height);
+    }
+
+    public interface OnPreviewListener {
+        void onPreviewData(byte[] data, int width, int height);
     }
 
     public void openCamera() {
@@ -62,34 +124,50 @@ public class CameraProxy implements Camera.AutoFocusCallback{
         mOrientationEventListener.disable();
     }
 
-    public void startPreview(SurfaceHolder holder) {
-        if (mCamera != null) {
-            Log.v(TAG, "startPreview");
-            try {
-                mCamera.setPreviewDisplay(holder);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            mCamera.startPreview();
-        }
-    }
+//    public void startPreview(SurfaceHolder holder) {
+//        if (mCamera != null) {
+//            Log.v(TAG, "startPreview");
+//            try {
+//                mCamera.setPreviewDisplay(holder);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            mCamera.startPreview();
+//        }
+//    }
 
-    public void startPreview(SurfaceTexture surface) {
+    public void startPreview() {
         if (mCamera != null) {
             Log.v(TAG, "startPreview");
             try {
-                mCamera.setPreviewTexture(surface);
+                Log.d(TAG,"startPreview width:"+mPreviewWidth+" height:"+mPreviewHeight);
+                mBuffer = new byte[mPreviewWidth * mPreviewHeight * 3 / 2];
+                // 数据缓存区
+                mCamera.addCallbackBuffer(mBuffer);
+                mCamera.setPreviewCallbackWithBuffer(this);
+
+                //                mCamera.setPreviewTexture(surface);
+                mCamera.setPreviewDisplay(mSurfaceHolder); // SurfaceView 和 Camera绑定
+                if (mOnChangedSizeListener != null) { // 如果宽和高发生改变，就会回调此接口
+                    mOnChangedSizeListener.onChanged(mPreviewWidth, mPreviewHeight);
+                }
+                mCamera.startPreview();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            mCamera.startPreview();
         }
     }
 
     public void stopPreview() {
         if (mCamera != null) {
             Log.v(TAG, "stopPreview");
+            // 预览数据回调接口
+            mCamera.setPreviewCallback(null);
+            // 停止预览
             mCamera.stopPreview();
+            // 释放摄像头
+            mCamera.release();
+            mCamera = null;
         }
     }
 

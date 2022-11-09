@@ -18,13 +18,11 @@ public class Camera1Helper implements SurfaceHolder.Callback, Camera.PreviewCall
     private int mWidth; // 宽
     private int mCameraId; // 后摄 前摄像头
     private Camera mCamera; // Camera1 预览采集图像数据
-    private byte[] buffer; // 数据
-    private SurfaceHolder mSurfaceHolder; // Surface画面的帮助
+    private byte[] buffer; // 存储回调数据
+    private SurfaceHolder mSurfaceHolder; // Surface画面的帮助类
     private Camera.PreviewCallback mPreviewCallback; // 后面预览的画面，把此预览的画面 的数据回调出现 --->DerryPush ---> C++层
     private int mRotation; // 旋转画面相关的标识
     private OnChangedSizeListener mOnChangedSizeListener; // 你的宽和高发生改变，就会回调此接口
-
-
     private OnPreviewListener onPreviewListener;
 
     // 构造 必须传递基本上参数

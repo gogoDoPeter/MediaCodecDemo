@@ -40,17 +40,15 @@ public class ASyncEncodeActivity extends AppCompatActivity implements View.OnCli
         mBtStartRecord = (Button) findViewById(R.id.bt_start_record);
         mCameraView = findViewById(R.id.camera_view);
 
-        //cameraProxy was created in CameraSurfaceView
-        mCameraProxy = mCameraView.getCameraProxy();
-
         Log.d(TAG, "initView -");
     }
 
     private void initData() {
         Log.d(TAG, "initData +");
+        mBtStartRecord.setOnClickListener(this);
+        mBtSwitchCamera.setOnClickListener(this);
         mIsRecording = false;
         mEncoderCore = new AsyncEncoderCore(this);
-        mEncoderCore.setCameraProxy(mCameraProxy);
         mEncoderCore.setPreviewDisplay(mCameraView.getHolder());
         Log.d(TAG, "initData -");
     }
@@ -59,7 +57,7 @@ public class ASyncEncodeActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.bt_start_record:
-                Log.d(TAG,"start record async");
+                startRecording();
                 break;
             case R.id.bt_switch_camera:
                 break;
@@ -68,7 +66,7 @@ public class ASyncEncodeActivity extends AppCompatActivity implements View.OnCli
 
     private void startRecording() {
         mIsRecording = !mIsRecording;
-
+        Log.d(TAG, "startRecording mIsRecording:"+mIsRecording);
         if (mIsRecording) {
             mEncoderCore.startRecord();
             mBtStartRecord.setText("MediaCodec停止");
