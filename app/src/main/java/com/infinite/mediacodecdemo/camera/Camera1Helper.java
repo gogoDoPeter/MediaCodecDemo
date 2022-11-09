@@ -200,7 +200,6 @@ public class Camera1Helper implements SurfaceHolder.Callback, Camera.PreviewCall
     }
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> 下面就是SurfaceView 需要的 start
-
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.d(TAG,"surfaceCreated ");

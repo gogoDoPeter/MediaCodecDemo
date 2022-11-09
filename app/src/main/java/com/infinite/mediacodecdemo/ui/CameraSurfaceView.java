@@ -11,7 +11,7 @@ import android.view.SurfaceView;
 import com.infinite.mediacodecdemo.camera.CameraProxy;
 
 public class CameraSurfaceView extends SurfaceView {
-    private static final String TAG="CameraSurfaceView";
+    private static final String TAG = "CameraSurfaceView";
     private CameraProxy mCameraProxy;
     private int mRatioWidth = 0;
     private int mRatioHeight = 0;
@@ -19,30 +19,36 @@ public class CameraSurfaceView extends SurfaceView {
 
     public CameraSurfaceView(Context context) {
         this(context, null);
+        Log.d(TAG, "CameraSurfaceView 1 param");
     }
 
     public CameraSurfaceView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
+        Log.d(TAG, "CameraSurfaceView 2 params");
     }
 
     public CameraSurfaceView(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
+        Log.d(TAG, "CameraSurfaceView 3 params");
     }
 
     public CameraSurfaceView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        Log.d(TAG, "CameraSurfaceView 4 params");
         init(context);
     }
 
     private void init(Context context) {
+        Log.d(TAG," init +");
         getHolder().addCallback(mSurfaceHolderCallback);
         mCameraProxy = new CameraProxy((Activity) context);
+        Log.d(TAG," init -");
     }
 
     private final SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            Log.d(TAG,"surfaceCreated");
+            Log.d(TAG, "surfaceCreated");
             mCameraProxy.openCamera();
         }
 
@@ -50,18 +56,19 @@ public class CameraSurfaceView extends SurfaceView {
         public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             int previewWidth = mCameraProxy.getPreviewWidth();
             int previewHeight = mCameraProxy.getPreviewHeight();
-            Log.d(TAG,"surfaceChanged width="+width+" height="+height+" previewWidth="+previewWidth+" previewHeight="+previewHeight);
+            Log.d(TAG, "surfaceChanged width=" + width + " height=" + height + " previewWidth=" + previewWidth + " previewHeight=" + previewHeight);
             if (width > height) {
                 setAspectRatio(previewWidth, previewHeight);
             } else {
                 setAspectRatio(previewHeight, previewWidth);
             }
+            Log.d(TAG, "surfaceChanged start preview");
             mCameraProxy.startPreview(holder);
         }
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-            Log.d(TAG,"surfaceDestroyed");
+            Log.d(TAG, "surfaceDestroyed");
             mCameraProxy.releaseCamera();
         }
     };
@@ -84,7 +91,7 @@ public class CameraSurfaceView extends SurfaceView {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
-        Log.d(TAG,"onMeasure width="+width+", height="+height);
+        Log.d(TAG, "onMeasure width=" + width + ", height=" + height);
         if (0 == mRatioWidth || 0 == mRatioHeight) {
             setMeasuredDimension(width, height);
         } else {
