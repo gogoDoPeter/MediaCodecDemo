@@ -97,10 +97,12 @@ public class MediaCodecEncoder extends BaseEncoder {
     }
 
     public void putData(byte[] buffer) {
+        Log.d(TAG, "putData: + yuv420Queue size:" + yuv420Queue.size());
         if (yuv420Queue.size() >= 10) { //保持队列size不超过10,因为初始化分配大小就是10
             yuv420Queue.poll();//获取队列开头元素并删除
         }
         yuv420Queue.add(buffer); //给队列(末尾)插入元素
+        Log.d(TAG, "putData: - yuv420Queue size:" + yuv420Queue.size());
     }
 
     public void startEncoder() {
@@ -115,6 +117,7 @@ public class MediaCodecEncoder extends BaseEncoder {
                         Log.d(TAG, "exit encoder");
                         break;
                     }
+                    Log.d(TAG, "startEncoder: yuv420Queue size:" + yuv420Queue.size());
                     if (yuv420Queue.size() > 0) {
                         input = yuv420Queue.poll(); //获取队列开头元素并删除
                     }
@@ -129,6 +132,7 @@ public class MediaCodecEncoder extends BaseEncoder {
                                     inputBuffer = mMediaCodec.getInputBuffers()[inputBufferIndex];
                                 }
                                 inputBuffer.clear();
+                                Log.d(TAG, "startEncoder: put input buffer");
                                 //  /storage/emulated/0/Android/data/com.infinite.mediacodecdemo/cache/
 //                                FileUtils.dumpData(input,1920,1080,"/sdcard/DCIM/input_10.i420");
                                 inputBuffer.put(input); //将数据设置给inputBuffer

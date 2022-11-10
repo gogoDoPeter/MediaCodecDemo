@@ -22,7 +22,6 @@ public class EncoderCore implements Camera1Helper.OnPreviewListener,
     private static final String dumpPrefix2="/data/vendor/media/";
     private String dumpPrefix3;
 
-
     public EncoderCore(Activity activity) {
         mContext = activity;
         mOutFile = new File(mContext.getExternalCacheDir(), "demo1.yuv");

@@ -25,7 +25,8 @@ public class MediaCodecAsyncEncoder extends BaseEncoder {
     private static final int TIMEOUT_S = 10000;
     private MediaCodec mMediaCodec;
     private volatile boolean isRunning = false;
-
+    private int mWidth;
+    private int mHeight;
     private ArrayBlockingQueue<byte[]> yuv420Queue = new ArrayBlockingQueue<>(10);
     private MediaMuxer mMuxer;
     private int mTrackIndex;
@@ -42,40 +43,77 @@ public class MediaCodecAsyncEncoder extends BaseEncoder {
 
     public MediaCodecAsyncEncoder(int width, int height) {
         mFrameIndex = 0;
+        mWidth=width;
+        mHeight=height;
+    }
+
+    public void setOutputPath(String outputPath) {
+        // Create a MediaMuxer.  We can't add the video track and start() the muxer here,
+        // because our MediaFormat doesn't have the Magic Goodies.  These can only be
+        // obtained from the encoder after it has started processing data.
+        //
+        // We're not actually interested in multiplexing audio.  We just want to convert
+        // the raw H.264 elementary stream we get from MediaCodec into a .mp4 file.
+        try {
+            // /storage/emulated/0/Android/data/com.infinite.mediacodecdemo/cache/mc_sync.mp4
+            Log.d(TAG, "outputPath:" + outputPath);
+            mMuxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+        } catch (IOException ioe) {
+            throw new RuntimeException("MediaMuxer creation failed", ioe);
+        }
+
+        mTrackIndex = -1;
+        mMuxerStarted = false;
+    }
+
+    public void putData(byte[] buffer) {
+        Log.d(TAG, "putData: + yuv420Queue size:" + yuv420Queue.size());
+        if (yuv420Queue.size() >= 10) { //保持队列size不超过10,因为初始化分配大小就是10
+            yuv420Queue.poll();//获取队列开头元素并删除
+        }
+        yuv420Queue.add(buffer); //给队列(末尾)插入元素
+        Log.d(TAG, "putData: - yuv420Queue size:" + yuv420Queue.size());
+    }
+
+    public void startEncoder() {
+        isRunning = true;
+
         mBufferInfo = new MediaCodec.BufferInfo();
-        MediaFormat mediaFormat = MediaFormat.createVideoFormat(MIMETYPE_VIDEO_AVC, width, height);
+        MediaFormat mediaFormat = MediaFormat.createVideoFormat(MIMETYPE_VIDEO_AVC, mWidth, mHeight);
         mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT,
                 MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible); //设置COLOR_FormatYUV420Flexible要给mediaCode传NV12数据来编码
 
-        int bitRate = width * height * 4;
-        Log.d(TAG,"bitRate:"+bitRate +", width:"+width+" height:"+height);
+        int bitRate = mWidth * mHeight * 4;
+        Log.d(TAG,"bitRate:"+bitRate +", width:"+mWidth+" height:"+mHeight);
         /** Constant quality mode */
 //        public static final int BITRATE_MODE_CQ = 0;
         /** Variable bitrate mode */
 //        public static final int BITRATE_MODE_VBR = 1;
         /** Constant bitrate mode */
 //        public static final int BITRATE_MODE_CBR = 2;
-
 //        format.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CQ); //crash
         mediaFormat.setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR); //
         mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitRate);
         mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 30);//FPS
         mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1); //2~3s插入一个关键帧比较合理
 
-
         try {
             mMediaCodec = MediaCodec.createEncoderByType(MIMETYPE_VIDEO_AVC);
+            Log.e(TAG, "mMediaCodec configure");
+            //RedMi k40 must set configure before setCallback
             mMediaCodec.configure(mediaFormat,
                     null, //inputSurface
                     null,   //加密相关的
                     MediaCodec.CONFIGURE_FLAG_ENCODE);
 
+            Log.e(TAG, "mMediaCodec setCallback");
             mMediaCodec.setCallback(new MediaCodec.Callback() {
                 @Override
                 public void onInputBufferAvailable(@NonNull MediaCodec codec, int index) {
-                    Log.i(TAG, "onInputBufferAvailable:" + index);
+                    Log.i(TAG, "onInputBufferAvailable:" + index +", codec:"+codec);
                     byte[] input = null;
                     if (isRunning) {
+                        Log.i(TAG, "onInputBufferAvailable:" + index +", queue size:"+yuv420Queue.size());
                         if (yuv420Queue.size() > 0) {
                             input = yuv420Queue.poll();
                         }
@@ -83,6 +121,7 @@ public class MediaCodecAsyncEncoder extends BaseEncoder {
                             ByteBuffer inputBuffer = codec.getInputBuffer(index);
                             inputBuffer.clear();
                             inputBuffer.put(input);
+                            Log.i(TAG, "onInputBufferAvailable:" + index +", put buffer");
                             codec.queueInputBuffer(index, 0, input.length, getPTSUs(), 0);
                         }
                     }
@@ -90,14 +129,15 @@ public class MediaCodecAsyncEncoder extends BaseEncoder {
 
                 @Override
                 public void onOutputBufferAvailable(@NonNull MediaCodec codec, int index, @NonNull MediaCodec.BufferInfo info) {
-                    Log.i(TAG, "onOutputBufferAvailable:" + index);
+                    Log.i(TAG, "onOutputBufferAvailable:" + index+", get buf, codec:"+codec +", info.flags:"+info.flags);
                     ByteBuffer outputBuffer = codec.getOutputBuffer(index);
 
-                    if (info.flags == MediaCodec.BUFFER_FLAG_CODEC_CONFIG) {
+                    if (info.flags == MediaCodec.BUFFER_FLAG_CODEC_CONFIG) { //2
                         info.size = 0;
                     }
 
-                    if (info.size > 0) {
+                    if (info.size > 0) { //>=0 ？
+                        Log.i(TAG, "onOutputBufferAvailable:" + index+", get outputBuffer");
                         // adjust the ByteBuffer values to match BufferInfo (not needed?)
                         outputBuffer.position(info.offset);
                         outputBuffer.limit(info.offset + info.size);
@@ -113,21 +153,24 @@ public class MediaCodecAsyncEncoder extends BaseEncoder {
                             if (!mMuxerStarted) {
                                 throw new RuntimeException("muxer hasn't started");
                             }
+                            Log.i(TAG, "onOutputBufferAvailable:" + index+", mMuxer writeSampleData outputBuffer, mTrackIndex:"+mTrackIndex);
                             mMuxer.writeSampleData(mTrackIndex, outputBuffer, info);
                         }
 
                     }
+                    Log.i(TAG, "onOutputBufferAvailable:" + index+", release buf, codec:"+codec);
                     codec.releaseOutputBuffer(index, false);
                 }
 
                 @Override
                 public void onError(@NonNull MediaCodec codec, @NonNull MediaCodec.CodecException e) {
-                    Log.e(TAG, "onError");
+                    Log.e(TAG, "onError"+", codec:"+codec);
+                    e.printStackTrace();
                 }
 
                 @Override
                 public void onOutputFormatChanged(@NonNull MediaCodec codec, @NonNull MediaFormat format) {
-                    Log.i(TAG, "onOutputFormatChanged format:" + format);
+                    Log.i(TAG, "onOutputFormatChanged format:" + format+", codec:"+codec);
                     if (null != mEncoderCallback) {
                         mEncoderCallback.outputMediaFormatChanged(H264_ENCODER, format);
                     }
@@ -137,48 +180,22 @@ public class MediaCodecAsyncEncoder extends BaseEncoder {
                         }
                         // now that we have the Magic Goodies, start the muxer
                         mTrackIndex = mMuxer.addTrack(format);
+                        Log.e(TAG, "mMuxer start");
                         mMuxer.start();
-
                         mMuxerStarted = true;
                     }
                 }
             });
 
-
+//            mMediaCodec.configure(mediaFormat,
+//                    null, //inputSurface
+//                    null,   //加密相关的
+//                    MediaCodec.CONFIGURE_FLAG_ENCODE);
+            Log.e(TAG, "mMediaCodec start, mMediaCodec:"+mMediaCodec);
             mMediaCodec.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void setOutputPath(String outputPath) {
-        // Create a MediaMuxer.  We can't add the video track and start() the muxer here,
-        // because our MediaFormat doesn't have the Magic Goodies.  These can only be
-        // obtained from the encoder after it has started processing data.
-        //
-        // We're not actually interested in multiplexing audio.  We just want to convert
-        // the raw H.264 elementary stream we get from MediaCodec into a .mp4 file.
-        try {
-            // /storage/emulated/0/Android/data/com.infinite.mediacodecdemo/cache/mc_sync.mp4
-            Log.d(TAG, "outputPath " + outputPath);
-            mMuxer = new MediaMuxer(outputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
-        } catch (IOException ioe) {
-            throw new RuntimeException("MediaMuxer creation failed", ioe);
-        }
-
-        mTrackIndex = -1;
-        mMuxerStarted = false;
-    }
-
-    public void putData(byte[] buffer) {
-        if (yuv420Queue.size() >= 10) { //保持队列size不超过10,因为初始化分配大小就是10
-            yuv420Queue.poll();//获取队列开头元素并删除
-        }
-        yuv420Queue.add(buffer); //给队列(末尾)插入元素
-    }
-
-    public void startEncoder() {
-        isRunning = true;
     }
 
     public void stopEncoder() {

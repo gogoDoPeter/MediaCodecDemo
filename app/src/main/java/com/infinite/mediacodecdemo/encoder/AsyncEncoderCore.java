@@ -20,7 +20,6 @@ public class AsyncEncoderCore implements Camera1Helper.OnPreviewListener,
     private String dumpPrefix3;
     private Camera1Helper mCamera1Helper;
 
-
     public AsyncEncoderCore(Activity activity) {
         mContext = activity;
         mOutFile = new File(mContext.getExternalCacheDir(), "demo1.yuv");
@@ -57,28 +56,13 @@ public class AsyncEncoderCore implements Camera1Helper.OnPreviewListener,
 
     @Override
     public void onPreviewData(byte[] data, int width, int height) {
-        Log.d(TAG, "onPreviewData mIsRecording:"+mIsRecording+" width:" + width + ", height:" + height);
-        if (mIsRecording) {
-            startMediaCodecRecord(data, width, height);
-        } else {
-            endMediaCodecRecord();
-        }
+//        Log.d(TAG, "onPreviewData mIsRecording:"+mIsRecording+" width:" + width + ", height:" + height);
+        mediacodecSetData(data, width, height);
     }
 
-    private void endMediaCodecRecord() {
-        if (mEncoder != null) {
-            mEncoder.stopEncoder();
-            mEncoder = null;
-        }
-        mIsRecording = false;
-    }
-
-    private void startMediaCodecRecord(byte[] data, int width, int height) {
+    private void mediacodecSetData(byte[] data, int width, int height) {
         if (mEncoder == null) {
             mEncoder = new MediaCodecAsyncEncoder(width, height);
-            Log.d(TAG, "dumpPrefix3:" + dumpPrefix3);
-            mEncoder.setOutputPath(dumpPrefix3 + "mc_async.mp4");
-            mEncoder.startEncoder();
         }
         if (mFrameIndex < 5) {
             Log.d(TAG, "startMediaCodecRecord width:" + width + " height:" + height);
@@ -86,7 +70,8 @@ public class AsyncEncoderCore implements Camera1Helper.OnPreviewListener,
 //        String fileNameIn = dumpPrefix3 +"in_" + String.format("%d_%dx%d.nv21", mFrameIndex, width, height); //get NV21 data
 //        FileUtils.dumpData(data, width, height, fileNameIn);
         byte[] outI420 = new byte[width * height * 3 / 2];
-        NV21ToNV12(data, outI420, width, height);     //NV21 convert to NV12
+//        NV21ToNV12(data, outI420, width, height);     //NV21 convert to NV12
+        NV21ToI420(data, outI420, width, height);     //NV21 convert to I420
 //        String fileNameOut = dumpPrefix3 +"out_" + String.format("%d_%dx%d.i420", mFrameIndex, width, height); //get I420 data
 //        FileUtils.dumpData(outI420, width, height, fileNameOut);
         mFrameIndex++;
@@ -151,9 +136,16 @@ public class AsyncEncoderCore implements Camera1Helper.OnPreviewListener,
 
     public void startRecord() {
         mIsRecording = true;
+        Log.d(TAG, "dumpPrefix3:" + dumpPrefix3);
+        mEncoder.setOutputPath(dumpPrefix3 + "mc_async.mp4");
+        mEncoder.startEncoder();
     }
 
     public void stopRecord() {
         mIsRecording = false;
+        if (mEncoder != null) {
+            mEncoder.stopEncoder();
+            mEncoder = null;
+        }
     }
 }
